@@ -4,7 +4,7 @@ WebSocket chat written in TypeScript
 
 # Installation
 
-1. Clone repository (`git clone https://github.com/Assasans/websocket-server-example.git`)
+1. Clone this repository (`git clone https://github.com/Assasans/durka-chat.git`)
 2. Install dependencies (`npm install`)
 3. Build TypeScript (`npm run build`)
 4. Copy `config.example.json` to `config.json` and fill your MySQL auth information
