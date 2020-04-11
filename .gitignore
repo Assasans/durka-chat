@@ -1,0 +1,10 @@
+build/
+logs/
+
+node_modules/
+
+public/images/avatars/*
+!public/images/avatars/default.png
+!public/images/avatars/durka.jpg
+
+config.json

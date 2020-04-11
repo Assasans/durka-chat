@@ -1,0 +1,14 @@
+{
+	"web": {
+		"port": 2012
+	},
+	"gateway": {
+		"path": "/websocket"
+	},
+	"mysql": {
+		"host": "localhost",
+		"user": "",
+		"password": "",
+		"database": ""
+	}
+}
