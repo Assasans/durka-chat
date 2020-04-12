@@ -1,4 +1,5 @@
 import * as WebSocket from 'ws';
+import * as _ from 'lodash';
 
 import Collection from '@discordjs/collection';
 
@@ -17,13 +18,20 @@ export class UserAvatar {
 	}
 }
 
+export const BotType = {
+	None: 0,
+	Normal: 1,
+	Verified: 2,
+	Gateway: 3
+}
+
 export class UserProfile {
 	public id: Snowflake;
 	public username: string;
 	public discriminator: string;
 	public avatar: UserAvatar | null;
 
-	public bot: boolean;
+	public bot: number;
 
 	public email: string;
 	public password: string;
@@ -32,7 +40,7 @@ export class UserProfile {
 
 	public constructor(
 		id: Snowflake, username: string, discriminator: string,
-		avatar: UserAvatar | null, bot: boolean, email: string,
+		avatar: UserAvatar | null, bot: number, email: string,
 		password: string, administrator: boolean
 	) {
 		this.id = id;
@@ -55,7 +63,7 @@ export class UserProfile {
 			row['discriminator'],
 			row['avatar_hash'] !== null ? new UserAvatar(row['avatar_hash'], false) : null,
 
-			row['bot'] === 1 ? true : false,
+			_.find(BotType, (value) => value === row['bot']) || BotType.None,
 
 			row['email'],
 			row['password'],
@@ -70,7 +78,7 @@ export class UserProfile {
 			'Deleted User',
 			'0000',
 			null,
-			false,
+			BotType.None,
 			'',
 			'',
 			false
@@ -83,7 +91,7 @@ export class UserProfile {
 			'Guest User',
 			'0000',
 			null,
-			false,
+			BotType.None,
 			'',
 			'',
 			false
@@ -138,7 +146,7 @@ export class User {
 		return this.profile.avatar
 	}
 
-	public get bot(): boolean {
+	public get bot(): number {
 		return this.profile.bot;
 	}
 

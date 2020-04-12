@@ -106,8 +106,9 @@ export class Gateway {
 				channelId,
 				'general',
 				'Основной чат',
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -115,8 +116,9 @@ export class Gateway {
 				channelId,
 				'палата',
 				null,
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -124,8 +126,9 @@ export class Gateway {
 				channelId,
 				'дурка',
 				'Дурка ебать',
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -133,8 +136,9 @@ export class Gateway {
 				channelId,
 				'your-name',
 				'Как тебя зовут?',
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -142,8 +146,9 @@ export class Gateway {
 				channelId,
 				'durka-stable',
 				null,
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -151,8 +156,9 @@ export class Gateway {
 				channelId,
 				'official-gateway',
 				null,
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			const channelId: Snowflake = SnowflakeUtils.generate();
@@ -160,8 +166,9 @@ export class Gateway {
 				channelId,
 				'lost-and-found',
 				'Channel for unknown messages',
-				new Collection<Snowflake, Message>())
-			);
+				new Collection<Snowflake, Message>(),
+				new Collection<Snowflake, User>()
+			));
 		}
 		{
 			for(let i: number = 0; i < 10; i++) {
@@ -170,8 +177,9 @@ export class Gateway {
 					channelId,
 					`overflow-${i + 1}`,
 					`Testing channel scrolling (channel ${i + 1})`,
-					new Collection<Snowflake, Message>())
-				);
+					new Collection<Snowflake, Message>(),
+					new Collection<Snowflake, User>()
+				));
 			}
 		}
 
@@ -190,6 +198,7 @@ export class Gateway {
 					fetchedMessage.id,
 					DateTime.fromSeconds(fetchedMessage.time),
 					channel,
+					fetchedMessage.broadcast,
 					userProfile,
 					fetchedMessage.content
 				);
@@ -217,6 +226,11 @@ export class Gateway {
 			socket.on('close', (code: number, reason: string) => {
 				Logger.websocket.trace(`Connection ${chalk.blueBright(request.connection.remoteAddress)} closed with code ${chalk.blueBright(code)}`);
 
+				this.channels.forEach((channel: Channel) => {
+					if(user) {
+						channel.typing.delete(user.id);
+					}
+				});
 				if(user) {
 					this.users.delete(user.id);
 				}
@@ -278,6 +292,24 @@ export class Gateway {
 
 					if(!user) return;
 
+					if(action === 'user.state.send.typing') {
+						const channel: Channel = this.channels.get(data.channel) || this.channels.find((channel) => channel.name === 'lost-and-found') as Channel;
+
+						if(data.typing) {
+							channel.typing.set(user.id, user);
+						} else {
+							channel.typing.delete(user.id);
+						}
+
+						this.channels.each((channel: Channel) => {
+							this.broadcastAll(JSON.stringify({
+								action: 'users.state.typing',
+								channel: channel,
+								users: channel.typing.array()
+							}));
+						});
+					}
+
 					if(action === 'message.send') {
 						const channel: Channel = this.channels.get(data.channel) || this.channels.find((channel) => channel.name === 'lost-and-found') as Channel;
 
@@ -289,6 +321,7 @@ export class Gateway {
 							SnowflakeUtils.generate(),
 							DateTime.local(),
 							channel,
+							data.broadcast || false,
 							user.profile,
 							content
 						);
@@ -306,6 +339,7 @@ export class Gateway {
 							SnowflakeUtils.generate(),
 							DateTime.local(),
 							channel,
+							data.broadcast || false,
 							content
 						);
 						this.broadcastAll(JSON.stringify(message));

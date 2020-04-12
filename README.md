@@ -12,7 +12,7 @@ WebSocket chat written in TypeScript
     - Bot (normal)
     - Bot (verified)
     - Gateway
-	- [WIP] Users authentication
+	- [WIP] User authentication
 - Channels
 	- Channel list
 - Messages

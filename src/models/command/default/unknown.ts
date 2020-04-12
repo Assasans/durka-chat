@@ -20,6 +20,7 @@ export class UnknownCommand extends Command {
 			SnowflakeUtils.generate(),
 			DateTime.local(),
 			channel,
+			false,
 			`Неизвестная команда. Напишите <u>${registry.prefix}help</u> для отображения списка команд`
 		)));
 		return true;

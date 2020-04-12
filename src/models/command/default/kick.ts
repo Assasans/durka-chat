@@ -22,6 +22,7 @@ export class KickCommand extends Command {
 				SnowflakeUtils.generate(),
 				DateTime.local(),
 				channel,
+				false,
 				`Укажите имя пациента!`
 			)));
 			return false;
@@ -35,6 +36,7 @@ export class KickCommand extends Command {
 				SnowflakeUtils.generate(),
 				DateTime.local(),
 				channel,
+				false,
 				`Пациент <b>${targetUser.username}#${targetUser.discriminator}</b> отключён от сервера!`
 			)));
 			return true;
@@ -43,6 +45,7 @@ export class KickCommand extends Command {
 				SnowflakeUtils.generate(),
 				DateTime.local(),
 				channel,
+				false,
 				`Пациент <b>${username}</b> не найден!`
 			)));
 			return false;

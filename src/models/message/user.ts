@@ -8,13 +8,14 @@ import { Snowflake } from '../../helper/snowflake';
 
 export class UserMessage extends Message {
 	public user: UserProfile;
+
 	public content: string;
 
 	public constructor(
-		id: Snowflake, time: DateTime, channel: Channel,
+		id: Snowflake, time: DateTime, channel: Channel, broadcast: boolean,
 		user: UserProfile, content: string
 	) {
-		super(id, time, channel);
+		super(id, time, channel, broadcast);
 		this.user = user;
 		this.content = content;
 	}
@@ -25,6 +26,7 @@ export class UserMessage extends Message {
 			Math.floor(this.time.toSeconds()),
 			this.user.id,
 			this.channel.id,
+			this.broadcast,
 			this.content
 		);
 	}
@@ -35,6 +37,7 @@ export class UserMessage extends Message {
 			id: this.id,
 			time: Math.floor(this.time.toSeconds()),
 			channel: this.channel,
+			broadcast: this.broadcast,
 			user: this.user,
 			content: this.content
 		};
@@ -46,20 +49,24 @@ export class UserMessageInfo {
 	public time: number;
 
 	public user: Snowflake;
+
 	public channel: Snowflake;
+	public broadcast: boolean;
 
 	public content: string;
 
 	public constructor(
 		id: Snowflake, time: number,
-		user: Snowflake, channel: Snowflake,
+		user: Snowflake, channel: Snowflake, broadcast: boolean,
 		content: string
 	) {
 		this.id = id;
 		this.time = time;
 
 		this.user = user;
+
 		this.channel = channel;
+		this.broadcast = broadcast;
 
 		this.content = content;
 	}
@@ -70,6 +77,7 @@ export class UserMessageInfo {
 			id: this.id,
 			time: this.time,
 			channel: this.channel,
+			broadcast: this.broadcast,
 			user: this.user,
 			content: this.content
 		};
@@ -82,7 +90,9 @@ export class UserMessageInfo {
 			row['time'],
 
 			row['user'],
+
 			row['channel'],
+			row['broadcast'],
 
 			row['content']
 		);

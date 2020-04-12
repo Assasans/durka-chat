@@ -20,6 +20,7 @@ export class SnowflakeCommand extends Command {
 			SnowflakeUtils.generate(),
 			DateTime.local(),
 			channel,
+			false,
 			`Snowflake: <b>${SnowflakeUtils.generate()}</b>`
 		)));
 		return true;

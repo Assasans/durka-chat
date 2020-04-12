@@ -20,6 +20,7 @@ export class HelpCommand extends Command {
 			SnowflakeUtils.generate(),
 			DateTime.local(),
 			channel,
+			false,
 			`Доступные команды: <ul>${registry.commands.map((command: Command) => {
 				return `<li>${registry.prefix}${command.name} - ${command.description}</li>`;
 			}).join('\n')}</ul>`

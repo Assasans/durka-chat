@@ -1,6 +1,7 @@
 const cachedUsers = [];
 const cachedMesages = [];
 const cachedChannels = [];
+const cachedTyping = {};
 
 let gatewayInfo = null;
 let currentChannel = null;
@@ -90,6 +91,43 @@ function setChannels(channels) {
 	});
 }
 
+function setTyping(channel, users) {
+	if(!cachedTyping[channel.id]) cachedTyping[channel.id] = [];
+
+	const elementTyping = $('#channel-users-typing');
+	if(channel.id === currentChannel) {
+		elementTyping.empty();
+	}
+
+	users.forEach((user, index) => {
+		cachedTyping[channel.id].push(user);
+
+		if(channel.id === currentChannel) {
+			const elementUser = $('<a class="channel-user-typing"></a>');
+			elementUser.text(`${user.username}`);
+
+			if(index < users.length - 1) {
+				const elementSeparator = $('<a class="channel-user-typing"> и </a>');
+
+				elementSeparator.append(elementUser);
+			} else if(index < users.length - 2) {
+				const elementSeparator = $('<a class="channel-user-typing">, </a>');
+
+				elementSeparator.append(elementUser);
+			}
+		
+			elementTyping.append(elementUser);
+		}
+	});
+
+	if(channel.id === currentChannel && users.length > 0) {
+		const elementTextTyping = $('<a class="channel-text-typing"></a>');
+		elementTextTyping.text(users.length > 1 ? ' печатают...' : ' печатает...');
+
+		elementTyping.append(elementTextTyping);
+	}
+}
+
 function handleMessage(data) {
 	if(data.action === 'user.connect') {
 		log.gateway(formatTime(data.time), `${data.content}`);
@@ -112,8 +150,7 @@ function handleMessage(data) {
 		
 		const userAvatar = $('<img class="user-avatar">');
 		const username = $('<a class="message-gateway-username"></a>');
-		//const tagBot = $('<span class="tag-bot-verified"><svg class="mark-bot-verified" width="16" height="16" viewBox="0 0 16 15.2"><path d="M7.4,11.17,4,8.62,5,7.26l2,1.53L10.64,4l1.36,1Z" fill="currentColor"></path></svg><a class="text-tag-bot">БОТ</a></div>');
-		const tagBot = $('<span class="tag-bot-gateway"><svg class="mark-bot-verified" width="16" height="16" viewBox="0 0 16 15.2"><path d="M7.4,11.17,4,8.62,5,7.26l2,1.53L10.64,4l1.36,1Z" fill="currentColor"></path></svg><a class="text-tag-bot">GATEWAY</a></div>');
+		const tagBot = $('<span class="tag-bot-gateway"><span class="mark-bot-verified material-icons">done</span><a class="text-tag-bot">GATEWAY</a></div>');
 		const time = $('<a class="message-time"></a>');
 		const elementContent = $('<a class="message-content"></a>');
 		
@@ -127,6 +164,10 @@ function handleMessage(data) {
 
 		elementTop.append(username);
 		elementTop.append(tagBot);
+		if(data.broadcast) {
+			const tagBroadcast = $('<span class="tag-broadcast"><a class="text-tag-bot">BROADCAST</a></div>');
+			elementTop.append(tagBroadcast);
+		}
 		elementTop.append(time);
 		elementBottom.append(elementContent);
 
@@ -159,6 +200,23 @@ function handleMessage(data) {
 		elementContent.html(data.content);
 
 		elementTop.append(username);
+		if(data.user.bot === 1 || data.user.bot === 2 || data.user.bot === 3) {
+			let tagBot = null;
+			if(data.user.bot === 1) {
+				tagBot = $('<span class="tag-bot-normal"><a class="text-tag-bot">БОТ</a></div>');
+			}
+			if(data.user.bot === 2) {
+				tagBot = $('<span class="tag-bot-verified"><span class="mark-bot-verified material-icons">done</span><a class="text-tag-bot">БОТ</a></div>');
+			}
+			if(data.user.bot === 3) {
+				tagBot = $('<span class="tag-bot-gateway"><span class="mark-bot-verified material-icons">done</span><a class="text-tag-bot">GATEWAY</a></div>');
+			}
+			elementTop.append(tagBot);
+		}
+		if(data.broadcast) {
+			const tagBroadcast = $('<span class="tag-broadcast"><a class="text-tag-bot">BROADCAST</a></div>');
+			elementTop.append(tagBroadcast);
+		}
 		elementTop.append(time);
 		elementBottom.append(elementContent);
 
@@ -180,7 +238,7 @@ function changeChannel(id) {
 
 	const channel = cachedChannels.find((channel) => channel.id === id);
 	const channelMessages = cachedMesages.filter((message) => {
-		return message.channel.id === channel.id;
+		return message.channel.id === channel.id || message.broadcast;
 	});
 
 	$('#text-channel-name').text(`#${channel.name}`);
@@ -193,8 +251,6 @@ function changeChannel(id) {
 	}
 
 	$('#input-message-content').prop('placeholder', `Написать в #${channel.name}`);
-
-	//log.local(luxon.DateTime.local().toFormat('HH:mm:ss'), `Установлен канал <b>#${channel.name}</b>`);
 
 	channelMessages.forEach((message) => {
 		handleMessage(message);
@@ -232,7 +288,7 @@ const log = {
 	}
 };
 
-function sendMessage(gateway) {
+function sendMessage(gateway, broadcast) {
 	if($('#input-message-content')[0].value.trim().length < 1) return;
 
 	const content = $('#input-message-content')[0].value.trim().replace(/(script)|(onclick)/g, 'invalid');
@@ -243,13 +299,15 @@ function sendMessage(gateway) {
 		websocket.send(JSON.stringify({
 			action: 'message.send.gateway',
 			channel: currentChannel,
-			content: content
+			content: content,
+			broadcast: broadcast
 		}));
 	} else {
 		websocket.send(JSON.stringify({
 			action: 'message.send',
 			channel: currentChannel,
-			content: content
+			content: content,
+			broadcast: broadcast
 		}));
 	}
 }
@@ -268,7 +326,7 @@ function connect(serverURL) {
 		$('#button-server-connect').prop('disabled', true);
 		$('#button-server-disconnect').prop('disabled', false);
 	
-		$('#input-content').prop('disabled', false);
+		$('#input-message-content').prop('disabled', false);
 	
 		$('#button-send').prop('disabled', false);
 		$('#button-send-gateway').prop('disabled', false);
@@ -282,7 +340,7 @@ function connect(serverURL) {
 		$('#button-server-connect').prop('disabled', false);
 		$('#button-server-disconnect').prop('disabled', true);
 	
-		$('#input-content').prop('disabled', true);
+		$('#input-message-content').prop('disabled', true);
 	
 		$('#button-send').prop('disabled', true);
 		$('#button-send-gateway').prop('disabled', true);
@@ -311,7 +369,7 @@ function connect(serverURL) {
 				messages.forEach((message) => {
 					cachedMesages.push(message);
 
-					if(message.channel.id === currentChannel) {
+					if(message.channel.id === currentChannel || message.broadcast) {
 						handleMessage(message);
 					}
 				});
@@ -343,10 +401,17 @@ function connect(serverURL) {
 				setUsers(users);
 			}
 
+			if(data.action === 'users.state.typing') {
+				const channel = data.channel;
+				const users = data.users;
+
+				setTyping(channel, users);
+			}
+
 			if(data.action.split('.')[0] === 'message') {
 				cachedMesages.push(data);
 
-				if(data.channel.id === currentChannel) {
+				if(data.channel.id === currentChannel || message.broadcast) {
 					handleMessage(data);
 				}
 			}
@@ -364,7 +429,7 @@ function disconnect() {
 	$('#button-server-connect').prop('disabled', false);
 	$('#button-server-disconnect').prop('disabled', true);
 
-	$('#input-content').prop('disabled', true);
+	$('#input-message-content').prop('disabled', true);
 
 	$('#button-send').prop('disabled', true);
 	$('#button-send-gateway').prop('disabled', true);
@@ -376,7 +441,7 @@ $(document).ready(() => {
 	$('#input-server')[0].value = 'ws://assasans.ml:2012/websocket';
 	$('#button-server-disconnect').prop('disabled', true);
 	
-	$('#input-content').prop('disabled', true);
+	$('#input-message-content').prop('disabled', true);
 
 	$('#button-send').prop('disabled', true);
 	$('#button-send-gateway').prop('disabled', true);
@@ -413,17 +478,34 @@ $(document).ready(() => {
 		disconnect();
 	});
 	
+
+	$('#input-message-content').on('keyup', (event) => {
+		if(event.target.value.trim().length > 0) {
+			websocket.send(JSON.stringify({
+				action: 'user.state.send.typing',
+				channel: currentChannel,
+				typing: true
+			}));
+		} else {
+			websocket.send(JSON.stringify({
+				action: 'user.state.send.typing',
+				channel: currentChannel,
+				typing: false
+			}));
+		}
+	});
+
 	$('#button-send').on('click', (event) => {
-		sendMessage(false);
+		sendMessage(false, $('#checkbox-message-broadcast').prop('checked'));
 	});
 	$(document).on('keypress', (event) => {
 		if(event.which === 13) {
-			sendMessage(false);
+			sendMessage(false, $('#checkbox-message-broadcast').prop('checked'));
 		}
 	});
 
 	$('#button-send-gateway').on('click', (event) => {
-		sendMessage(true);
+		sendMessage(true, $('#checkbox-message-broadcast').prop('checked'));
 	});
 
 	$('#button-chat-clear').on('click', (event) => {

@@ -247,6 +247,25 @@
 			margin-left: 0.6em;
 		}
 
+		#channel-users-typing {
+			font-family: 'Roboto', sans-serif;
+			font-size: 1em;
+
+			color: #dcddde;
+		}
+
+		.channel-user-typing {
+			font-weight: bold;
+		}
+
+		.channel-user-typing-separator {
+
+		}
+
+		.chanell-text-typing {
+
+		}
+		
 		#input-message-content {
 			margin-bottom: 0.5em;
 		}
@@ -406,6 +425,9 @@
 		}
 
 		.tag-bot-normal {
+			display: flex;
+			align-items: center;
+
 			padding: 0.05em 0.4em;
 			margin-left: 0.5em;
 
@@ -438,7 +460,21 @@
 			background-color: #9672da;
 		}
 
+		.tag-broadcast {
+			display: flex;
+			align-items: center;
+			
+			padding: 0.05em 0.4em;
+			margin-left: 0.5em;
+
+			border-radius: 0.25em;
+
+			background-color: #9672da;
+		}
+
 		.mark-bot-verified {
+			font-size: 1em;
+
 			margin-left: -0.2em;
 
 			color: #ffffff;
@@ -558,11 +594,13 @@
 					<div id="chat"></div>
 					<div id="options-message">
 						<div id="options-message-input">
-							<input style="width: 100%;" id="input-message-content" type="text" id="input-content" name="message" autocomplete="off" placeholder="Сообщение" />
+							<input style="width: 100%;" id="input-message-content" type="text" id="input-content" autocomplete="off" placeholder="Сообщение" />
 						</div>
+						<div id="channel-users-typing"></div>
 						<div style="display: flex;">
 							<button id="button-chat-clear" style="min-width: max-content;">Очистить чат</button>
 							<div style="display: flex; flex-direction: row-reverse; width: 100%">
+								<input type="checkbox" id="checkbox-message-broadcast" value="Broadcast"/>
 								<button id="button-send">Отправить</button>
 								<button id="button-send-gateway">Отправить от имени шлюза</button>
 							</div>

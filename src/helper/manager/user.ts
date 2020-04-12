@@ -21,6 +21,7 @@ export class UserManager extends Manager {
 
 				const user: UserProfile = UserProfile.fromRow(row);
 
+				/*
 				Logger.mysql.trace(`Fetched user ${chalk.blueBright.bold(userId)}:`);
 				Logger.mysql.trace(` User ID: ${chalk.blueBright(user.id)}`);
 				Logger.mysql.trace(` Username: '${chalk.blueBright(user.username)}'`);
@@ -28,6 +29,7 @@ export class UserManager extends Manager {
 				Logger.mysql.trace(` Email: '${chalk.blueBright(user.email)}'`);
 				Logger.mysql.trace(` Avatar: ${user.avatar ? `'${chalk.blueBright(user.avatar.hash)}'` : chalk.blueBright('null')}`);
 				Logger.mysql.trace(` Bot: ${chalk.blueBright(user.bot ? 'true' : 'false')}`);
+				*/
 
 				return resolve(user);
 			}).catch((error: QueryError) => {

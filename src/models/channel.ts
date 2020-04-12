@@ -4,6 +4,7 @@ import { RowDataPacket } from 'mysql2';
 
 import { Snowflake } from '../helper/snowflake';
 import { Message } from './message/message';
+import { User } from './user';
 
 export class Channel {
 	public id: Snowflake;
@@ -11,16 +12,18 @@ export class Channel {
 	public topic: string | null;
 
 	public messages: Collection<Snowflake, Message>;
+	public typing: Collection<Snowflake, User>;
 
 	public constructor(
 		id: Snowflake, name: string, topic: string | null,
-		messages: Collection<Snowflake, Message>
+		messages: Collection<Snowflake, Message>, typing: Collection<Snowflake, User>
 	) {
 		this.id = id;
 		this.name = name;
 		this.topic = topic;
 
 		this.messages = messages;
+		this.typing = typing;
 	}
 
 	public static deleted(): Channel {
@@ -28,7 +31,8 @@ export class Channel {
 			'0',
 			'deleted-channel',
 			null,
-			new Collection<Snowflake, Message>()
+			new Collection<Snowflake, Message>(),
+			new Collection<Snowflake, User>()
 		)
 	}
 

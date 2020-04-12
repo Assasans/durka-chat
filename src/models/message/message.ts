@@ -8,14 +8,16 @@ export abstract class Message {
 	public time: DateTime;
 
 	public channel: Channel;
+	public broadcast: boolean;
 
 	public constructor(
-		id: Snowflake, time: DateTime, channel: Channel
+		id: Snowflake, time: DateTime, channel: Channel, broadcast: boolean
 	) {
 		this.id = id;
 		this.time = time;
 
 		this.channel = channel;
+		this.broadcast = broadcast;
 	}
 
 	public toJSON() {
@@ -23,7 +25,8 @@ export abstract class Message {
 			action: 'message',
 			id: this.id,
 			time: Math.floor(this.time.toSeconds()),
-			channel: this.channel
+			channel: this.channel,
+			broadcast: this.broadcast
 		};
 	}
 }

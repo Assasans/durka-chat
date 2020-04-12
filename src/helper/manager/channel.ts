@@ -21,10 +21,12 @@ export class ChannelManager extends Manager {
 
 				const channel: ChannelInfo = ChannelInfo.fromRow(row);
 
+				/*
 				Logger.mysql.trace(`Fetched channel ${chalk.blueBright.bold(channelId)}:`);
 				Logger.mysql.trace(` Channel ID: ${chalk.blueBright(channel.id)}`);
 				Logger.mysql.trace(` Channel name: '${chalk.blueBright(channel.name)}'`);
 				Logger.mysql.trace(` Channel topic: ${channel.topic ? `'${chalk.blueBright(channel.topic)}'` : chalk.blueBright('null')}`);
+				*/
 
 				return resolve(channel);
 			}).catch((error: QueryError) => {
