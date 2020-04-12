@@ -15,8 +15,10 @@ WebSocket chat written in TypeScript
 	- [WIP] User authentication
 - Channels
 	- Channel list
+  - [WIP] Typing indicator
 - Messages
 	- [WIP] Unread messages
+  - Broadcast messages
 - [WIP] Bot API
 
 ## Installation
