@@ -33,7 +33,7 @@
     "handlebars": "^4.7.6",
     "http-errors": "^1.7.3",
     "lodash": "^4.17.15",
-    "log4js": "^6.1.2",
+    "log4js": "^6.4.0",
     "luxon": "^1.23.0",
     "mysql2": "^2.1.0",
     "promise-fs": "^2.1.1",
